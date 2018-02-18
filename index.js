@@ -33,13 +33,13 @@ class Block {
 }
 
 class BlockChain {
-  constructor(difficulty = null, reward = null) {
+  constructor(reward = null, difficulty = null) {
     this.chain = [
       new Block([
         new Transaction(null, 'easycoin', null, 'genesis')
       ], new Date())
     ];
-    this.difficulty = difficulty ? difficulty : 2; // set to 2 for development
+    this.difficulty = difficulty ? difficulty : 8;
     this.reward = reward ? reward : 100; // mining reward
     this.pendingTransactions = [];
   }
@@ -93,3 +93,12 @@ class BlockChain {
     return balance;
   }
 }
+
+const easycoin = new BlockChain();
+easycoin.appendTransaction(
+  new Transaction(null, 'userA', 500, 'Top Up')
+);
+easycoin.appendTransaction(
+  new Transaction(null, 'userB', 135, 'Top Up')
+);
+easycoin.processTransactions('krsna-address');
