@@ -12,13 +12,38 @@ class Block {
   }
 }
 
+class BlockChain {
+  constructor(chain = []) {
+    this.chain = chain;
+  }
+
+  isValid() {
+    for (let i = 1; this.chain.length > 1 && i < this.chain.length; i++) {
+      const currBlock = this.chain[i];
+      const prevBlock = this.chain[i - 1];
+
+      if (currBlock.hash !== currBlock.calculateHash()) return false;
+      if (currBlock.previousHash !== prevBlock.hash) return false;
+    }
+    return true;
+  }
+}
+
+const genBlock = new Block({}, new Date());
+
 const block = new Block(
   {
     from: 'sender',
     to: 'receiver',
     amount: 0
   },
-  new Date()
+  new Date(),
+  genBlock.hash
 );
 
-console.log(block.hash);
+const chain = new BlockChain([
+  genBlock,
+  block
+]);
+
+console.log(chain.isValid());
