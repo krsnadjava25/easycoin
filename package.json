@@ -1,0 +1,13 @@
+{
+  "name": "easycoin",
+  "version": "1.0.0",
+  "description": "Easy to build & easy to hack cryptocurrency",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": "https://github.com/krsnadjava25/easycoin.git",
+  "author": "Krisna Fathurahman <krisna.fathurahman@gmail.com>",
+  "license": "MIT",
+  "private": false
+}
