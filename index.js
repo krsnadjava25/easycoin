@@ -93,19 +93,3 @@ class BlockChain {
     return balance;
   }
 }
-
-const chain = new BlockChain();
-chain.appendTransaction(
-  new Transaction('buyer1', 'seller1', 50)
-);
-chain.appendTransaction(
-  new Transaction('buyer2', 'seller1', 10, 'Virtual private server monthly charge')
-);
-chain.processTransactions('miner1');
-chain.appendTransaction(
-  new Transaction('buyer1', 'seller2', 100, 'Quality assurance service charge')
-);
-chain.processTransactions('miner2');
-console.log('Is chain valid:', chain.isValid());
-console.log(chain);
-console.log('Balance of miner1:', chain.getBalanceFromAddress('miner1'));
