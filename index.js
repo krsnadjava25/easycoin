@@ -5,10 +5,21 @@ class Block {
     this.timestamp = timestamp;
     this.previousHash = previousHash ? previousHash : '';
     this.hash = this.calculateHash();
+    this.nonce = 0;
   }
 
   calculateHash() {
-    return SHA512(JSON.stringify(this.data) + this.timestamp + this.previousHash).toString();
+    return SHA512(JSON.stringify(this.data) + this.timestamp + this.previousHash + this.nonce).toString();
+  }
+
+  mine(difficulty = 8) {
+    const seed = 'easycoin';
+    let times = 1;
+    while (difficulty > seed.repeat(times)) times++;
+    while (this.hash.substring(0, difficulty) !== seed.repeat(times).substring(0, difficulty)) {
+      this.nonce++;
+      this.hash = this.calculateHash();
+    }
   }
 }
 
@@ -39,23 +50,37 @@ class BlockChain {
 
   append(newBlock) {
     if (!newBlock instanceof Block) throw new TypeError();
-      newBlock.previousHash = this.getLastestBlock().hash;
-      newBlock.hash = newBlock.calculateHash();
-      this.chain.push(newBlock);
+    newBlock.previousHash = this.getLastestBlock().hash;
+    newBlock.mine(2); // set to 2 for development
+    this.chain.push(newBlock);
   }
 }
 
-const block = new Block(
+const block1 = new Block(
   {
     from: 'sender',
     to: 'receiver',
-    amount: 0
+    amount: 50
+  },
+  new Date()
+);
+
+const block2 = new Block(
+  {
+    from: 'sender',
+    to: 'receiver',
+    amount: 100
   },
   new Date()
 );
 
 const chain = new BlockChain();
-chain.append(block);
+console.log('Mining block1...');
+chain.append(block1);
+console.log('Block mined');
+console.log('Mining block2...');
+chain.append(block2);
+console.log('Block mined');
 
 console.log('Is chain valid:', chain.isValid());
 console.log(chain);
