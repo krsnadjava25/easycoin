@@ -93,12 +93,3 @@ class BlockChain {
     return balance;
   }
 }
-
-const easycoin = new BlockChain();
-easycoin.appendTransaction(
-  new Transaction(null, 'userA', 500, 'Top Up')
-);
-easycoin.appendTransaction(
-  new Transaction(null, 'userB', 135, 'Top Up')
-);
-easycoin.processTransactions('krsna-address');
