@@ -1,7 +1,16 @@
 var SHA512 = require("crypto-js/sha512");
+
+class Transaction {
+  constructor(from, to, ammount, note = '') {
+    this.from = from;
+    this.to = to;
+    this.ammount = ammount;
+    this.note = note;
+  }
+}
 class Block {
-  constructor(data, timestamp, previousHash = null) {
-    this.data = data;
+  constructor(transactions, timestamp, previousHash = null) {
+    this.transactions = transactions;
     this.timestamp = timestamp;
     this.previousHash = previousHash ? previousHash : '';
     this.hash = this.calculateHash();
@@ -9,7 +18,7 @@ class Block {
   }
 
   calculateHash() {
-    return SHA512(JSON.stringify(this.data) + this.timestamp + this.previousHash + this.nonce).toString();
+    return SHA512(JSON.stringify(this.transactions) + this.timestamp + this.previousHash + this.nonce).toString();
   }
 
   mine(difficulty = 8) {
@@ -24,13 +33,15 @@ class Block {
 }
 
 class BlockChain {
-  constructor() {
+  constructor(difficulty = null, reward = null) {
     this.chain = [
-      new Block({
-        type: 'genesis',
-        for: 'easycoin'
-      }, new Date())
+      new Block([
+        new Transaction(null, 'easycoin', null, 'genesis')
+      ], new Date())
     ];
+    this.difficulty = difficulty ? difficulty : 2; // set to 2 for development
+    this.reward = reward ? reward : 100; // mining reward
+    this.pendingTransactions = [];
   }
 
   isValid() {
@@ -48,39 +59,53 @@ class BlockChain {
     return this.chain[this.chain.length - 1];
   }
 
-  append(newBlock) {
-    if (!newBlock instanceof Block) throw new TypeError();
-    newBlock.previousHash = this.getLastestBlock().hash;
-    newBlock.mine(2); // set to 2 for development
-    this.chain.push(newBlock);
+  processTransactions(minerID) {
+    if (this.pendingTransactions.length > 0) {
+      const block = new Block(
+        this.pendingTransactions,
+        new Date(),
+        this.getLastestBlock().hash
+      );
+      block.mine(this.difficulty);
+      this.chain.push(block);
+
+      this.pendingTransactions = [
+        new Transaction(null, minerID, this.reward, 'Mining reward')
+      ];
+    }
+  }
+
+  appendTransaction(newTransaction) {
+    if (!newTransaction instanceof Transaction) throw new TypeError();
+    this.pendingTransactions.push(newTransaction);
+  }
+
+  getBalanceFromAddress(address) {
+    let balance = 0;
+
+    this.chain.forEach(block => {
+      block.transactions.forEach(transaction => {
+        if(transaction.from === address) balance -= transaction.ammount;
+        if(transaction.to === address) balance += transaction.ammount;
+      });
+    });
+
+    return balance;
   }
 }
 
-const block1 = new Block(
-  {
-    from: 'sender',
-    to: 'receiver',
-    amount: 50
-  },
-  new Date()
-);
-
-const block2 = new Block(
-  {
-    from: 'sender',
-    to: 'receiver',
-    amount: 100
-  },
-  new Date()
-);
-
 const chain = new BlockChain();
-console.log('Mining block1...');
-chain.append(block1);
-console.log('Block mined');
-console.log('Mining block2...');
-chain.append(block2);
-console.log('Block mined');
-
+chain.appendTransaction(
+  new Transaction('buyer1', 'seller1', 50)
+);
+chain.appendTransaction(
+  new Transaction('buyer2', 'seller1', 10, 'Virtual private server monthly charge')
+);
+chain.processTransactions('miner1');
+chain.appendTransaction(
+  new Transaction('buyer1', 'seller2', 100, 'Quality assurance service charge')
+);
+chain.processTransactions('miner2');
 console.log('Is chain valid:', chain.isValid());
 console.log(chain);
+console.log('Balance of miner1:', chain.getBalanceFromAddress('miner1'));
