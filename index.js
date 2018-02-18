@@ -13,8 +13,13 @@ class Block {
 }
 
 class BlockChain {
-  constructor(chain = []) {
-    this.chain = chain;
+  constructor() {
+    this.chain = [
+      new Block({
+        type: 'genesis',
+        for: 'easycoin'
+      }, new Date())
+    ];
   }
 
   isValid() {
@@ -27,9 +32,18 @@ class BlockChain {
     }
     return true;
   }
-}
 
-const genBlock = new Block({}, new Date());
+  getLastestBlock() {
+    return this.chain[this.chain.length - 1];
+  }
+
+  append(newBlock) {
+    if (!newBlock instanceof Block) throw new TypeError();
+      newBlock.previousHash = this.getLastestBlock().hash;
+      newBlock.hash = newBlock.calculateHash();
+      this.chain.push(newBlock);
+  }
+}
 
 const block = new Block(
   {
@@ -37,13 +51,11 @@ const block = new Block(
     to: 'receiver',
     amount: 0
   },
-  new Date(),
-  genBlock.hash
+  new Date()
 );
 
-const chain = new BlockChain([
-  genBlock,
-  block
-]);
+const chain = new BlockChain();
+chain.append(block);
 
-console.log(chain.isValid());
+console.log('Is chain valid:', chain.isValid());
+console.log(chain);
